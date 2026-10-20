@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #140d0a;
+    --bg-secondary: #241612;
+    --bg-tertiary: #2f1d15;
+    --border-primary: #3f2319;
+    --border-accent: #55321f;
+    --text-primary: #f5f1eb;
+    --text-secondary: #cfb28c;
+    --text-muted: #b39463;
+    --accent-primary: #d28a4c;
+    --accent-hover: #e89b55;
+    --danger: #f0805f;
+    --success: #59c36a;
+  }
+
+  * {
+    border-color: #3f2319;
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    background-color: #140d0a;
+    color: #f5f1eb;
+    font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    overflow-x: hidden;
+  }
+
+  /* Focus ring visible for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid #e89b55;
+    outline-offset: 2px;
+  }
+}
+
+/* Shimmer effect for skeletons */
+@keyframes kurio-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #241612 25%,
+    #3f2319 50%,
+    #241612 75%
+  );
+  background-size: 200% 100%;
+  animation: kurio-shimmer 1.6s infinite linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: #241612;
+  }
+}
