@@ -2,7 +2,7 @@
 
 @layer base {
   :root {
-    --bg-primary: #140d0a;
+    --bg-primary: #140D0A;
     --bg-secondary: #241612;
     --bg-tertiary: #2f1d15;
     --border-primary: #3f2319;
@@ -23,7 +23,7 @@
 
   html,
   body {
-    background-color: #140d0a;
+    background-color: #140D0A;
     color: #f5f1eb;
     font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     overflow-x: hidden;

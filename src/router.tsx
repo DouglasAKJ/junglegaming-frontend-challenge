@@ -60,7 +60,7 @@ function DeferredAuthDialog() {
 
 function RootLayout() {
   return (
-    <div className="min-h-screen flex flex-col bg-[#140d0a] text-[#f5f1eb]">
+    <div className="min-h-screen flex flex-col bg-[#140D0A] text-[#f5f1eb]">
       <Header />
       <main id="main-content" className="flex-1">
         <React.Suspense fallback={<div className="min-h-[800px]" />}>

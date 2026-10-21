@@ -429,10 +429,10 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
         </button>
       </div>
 
-      {/* Hero Section matching Desktop & Mobile Figma */}
+      {/* Hero Section matching Desktop & Mobile Figma (no card wrapper, directly on #140D0A) */}
       <section
         aria-label="Destaque principal"
-        className="relative rounded-2xl bg-[#241612]/60 border border-[#3f2319] p-5 sm:p-8 lg:p-12 mb-8 md:mb-12 overflow-hidden"
+        className="relative bg-[#140D0A] py-2 sm:py-4 lg:py-6 mb-8 md:mb-12"
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           <div className="lg:col-span-7 space-y-4">
@@ -452,7 +452,7 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
                 to="/nft/$nftId"
                 params={{ nftId: activeSlide.id }}
                 data-testid="hero-explore-cta"
-                className="inline-flex items-center gap-2 rounded-md bg-[#d28a4c] px-6 py-3 text-xs sm:text-sm font-bold text-[#140d0a] hover:bg-[#e89b55] transition-colors"
+                className="inline-flex items-center gap-2 rounded-md bg-[#d28a4c] px-6 py-3 text-xs sm:text-sm font-bold text-[#140D0A] hover:bg-[#e89b55] transition-colors"
               >
                 <span>EXPLORAR</span>
                 <ArrowRight className="w-4 h-4 md:hidden" />
@@ -464,7 +464,7 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
             <Link
               to="/nft/$nftId"
               params={{ nftId: activeSlide.id }}
-              className="relative w-full max-w-[380px] aspect-square rounded-2xl overflow-hidden border border-[#55321f] shadow-2xl block"
+              className="relative w-full max-w-[380px] aspect-square rounded-2xl overflow-hidden block"
             >
               <img
                 src={activeSlide.image}
