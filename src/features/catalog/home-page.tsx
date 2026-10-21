@@ -232,6 +232,7 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
         if (next.page && next.page > 1) cleaned.page = next.page;
         return cleaned;
       },
+      resetScroll: false,
     });
   };
 
@@ -283,7 +284,7 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
     setSearchInput('');
     setMinPriceInput('0.02');
     setMaxPriceInput('12.30');
-    navigate({ to: '/', search: {} });
+    navigate({ to: '/', search: {}, resetScroll: false });
   };
 
   const activeSlide = HERO_SLIDES[heroIndex] || HERO_SLIDES[0];
@@ -300,15 +301,6 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
   const handleSliderChange = (vals: number[]) => {
     setMinPriceInput(vals[0].toFixed(2));
     setMaxPriceInput(vals[1].toFixed(2));
-  };
-
-  const handleSliderCommit = (vals: number[]) => {
-    updateSearchParams((prev) => ({
-      ...prev,
-      minPrice: vals[0].toFixed(2),
-      maxPrice: vals[1].toFixed(2),
-      page: 1,
-    }));
   };
 
   const renderFilterSidebarContent = () => (
@@ -360,7 +352,6 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
               className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer"
               value={sliderValue}
               onValueChange={handleSliderChange}
-              onValueCommit={handleSliderCommit}
               min={0}
               max={15}
               step={0.05}
