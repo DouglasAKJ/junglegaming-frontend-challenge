@@ -40,6 +40,19 @@ export function Header() {
     setSearchOpen(false);
   };
 
+  const handleMercadoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (pathname === '/') {
+      const el = document.getElementById('mercado');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        window.history.replaceState(null, '', '/#mercado');
+      }
+    } else {
+      navigate({ to: '/', hash: 'mercado' });
+    }
+  };
+
   const handleOutOfScopeNav = (label: string) => {
     addToast({
       title: `Página "${label}" fora do escopo`,
@@ -70,6 +83,12 @@ export function Header() {
         <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-8">
           <Link
             to="/"
+            onClick={() => {
+              if (pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.history.replaceState(null, '', '/');
+              }
+            }}
             className={`relative py-2 text-sm font-medium transition-colors ${
               pathname === '/'
                 ? 'text-[#d28a4c] font-bold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#d28a4c]'
@@ -78,16 +97,18 @@ export function Header() {
           >
             Início
           </Link>
-          <Link
-            to="/"
-            className={`relative py-2 text-sm font-medium transition-colors ${
+          <a
+            href="/#mercado"
+            data-testid="header-mercado-link"
+            onClick={handleMercadoClick}
+            className={`relative py-2 text-sm font-medium transition-colors cursor-pointer ${
               isCatalogActive
                 ? 'text-[#d28a4c] font-bold after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-[#d28a4c]'
                 : 'text-[#f5f1eb] hover:text-[#d28a4c]'
             }`}
           >
             Mercado
-          </Link>
+          </a>
           <button
             type="button"
             onClick={() => handleOutOfScopeNav('Criadores')}
@@ -236,13 +257,25 @@ export function MobileBottomNav() {
       </button>
 
       {/* Center Action Button matching Figma Mobile */}
-      <Link
-        to="/"
+      <a
+        href="/#mercado"
         aria-label="Explorar catálogo"
-        className="-mt-6 w-12 h-12 rounded-full bg-[#d28a4c] text-[#140d0a] shadow-lg flex items-center justify-center border-4 border-[#140d0a]"
+        onClick={(e) => {
+          if (pathname === '/') {
+            e.preventDefault();
+            const el = document.getElementById('mercado');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+              window.history.replaceState(null, '', '/#mercado');
+            }
+          } else {
+            navigate({ to: '/', hash: 'mercado' });
+          }
+        }}
+        className="-mt-6 w-12 h-12 rounded-full bg-[#d28a4c] text-[#140d0a] shadow-lg flex items-center justify-center border-4 border-[#140d0a] cursor-pointer"
       >
         <SlidersHorizontal className="w-5 h-5" />
-      </Link>
+      </a>
 
       <Link
         to="/carrinho"

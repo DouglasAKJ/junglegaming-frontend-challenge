@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import * as Slider from '@radix-ui/react-slider';
 import {
   Search,
   SlidersHorizontal,
   ArrowRight,
   ChevronRight,
+  ChevronLeft,
   RotateCcw,
   AlertTriangle,
 } from 'lucide-react';
@@ -142,6 +144,8 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
   const [minPriceInput, setMinPriceInput] = useState(search.minPrice || '0.02');
   const [maxPriceInput, setMaxPriceInput] = useState(search.maxPrice || '12.30');
   const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -152,6 +156,45 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
     setMinPriceInput(search.minPrice || '0.02');
     setMaxPriceInput(search.maxPrice || '12.30');
   }, [search.minPrice, search.maxPrice]);
+
+  // Autoplay hero slider every 5 seconds (pauses on hover/focus)
+  useEffect(() => {
+    if (heroPaused) return;
+    const timer = setInterval(() => {
+      setHeroIndex((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [heroPaused]);
+
+  // Scroll to #mercado if accessed directly or navigated from another page
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#mercado') {
+      const el = document.getElementById('mercado');
+      if (el) {
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
+  }, []);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        setHeroIndex((prev) => (prev + 1) % HERO_SLIDES.length);
+      } else {
+        setHeroIndex((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+      }
+    }
+    setTouchStartX(null);
+  };
 
   const queryParams = {
     q: currentQuery || undefined,
@@ -245,6 +288,29 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
 
   const activeSlide = HERO_SLIDES[heroIndex] || HERO_SLIDES[0];
 
+  const numMin = parseFloat(minPriceInput);
+  const numMax = parseFloat(maxPriceInput);
+  const safeMin = isNaN(numMin) ? 0.02 : Math.max(0, Math.min(numMin, 15));
+  const safeMax = isNaN(numMax) ? 12.3 : Math.max(0, Math.min(numMax, 15));
+  const sliderValue: [number, number] = [
+    Math.min(safeMin, safeMax),
+    Math.max(safeMin, safeMax),
+  ];
+
+  const handleSliderChange = (vals: number[]) => {
+    setMinPriceInput(vals[0].toFixed(2));
+    setMaxPriceInput(vals[1].toFixed(2));
+  };
+
+  const handleSliderCommit = (vals: number[]) => {
+    updateSearchParams((prev) => ({
+      ...prev,
+      minPrice: vals[0].toFixed(2),
+      maxPrice: vals[1].toFixed(2),
+      page: 1,
+    }));
+  };
+
   const renderFilterSidebarContent = () => (
     <div className="space-y-8">
       {/* Coleções */}
@@ -287,11 +353,32 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
       <div>
         <h2 className="text-base font-bold text-[#f5f1eb] mb-4">Faixa de preço</h2>
         <form onSubmit={handleApplyPriceFilter} className="space-y-3">
-          {/* Visual dual-thumb track matching Figma */}
-          <div className="relative h-2 w-full rounded-full bg-[#3f2319] my-3">
-            <div className="absolute left-[8%] right-[25%] top-0 bottom-0 rounded-full bg-[#d28a4c]" />
-            <div className="absolute left-[8%] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#d28a4c] border-2 border-[#140d0a]" />
-            <div className="absolute right-[25%] top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-[#d28a4c] border-2 border-[#140d0a]" />
+          {/* Interactive dual-thumb price slider */}
+          <div className="py-2">
+            <Slider.Root
+              data-testid="filter-price-slider"
+              className="relative flex items-center select-none touch-none w-full h-5 cursor-pointer"
+              value={sliderValue}
+              onValueChange={handleSliderChange}
+              onValueCommit={handleSliderCommit}
+              min={0}
+              max={15}
+              step={0.05}
+              minStepsBetweenThumbs={1}
+              aria-label="Faixa de preço em ETH"
+            >
+              <Slider.Track className="bg-[#3f2319] relative grow rounded-full h-2">
+                <Slider.Range className="absolute bg-[#d28a4c] rounded-full h-full" />
+              </Slider.Track>
+              <Slider.Thumb
+                className="block w-3.5 h-3.5 bg-[#d28a4c] border-2 border-[#140d0a] rounded-full shadow hover:scale-110 focus:outline-none focus:ring-1 focus:ring-[#d28a4c] cursor-grab active:cursor-grabbing transition-transform"
+                aria-label="Preço mínimo em ETH"
+              />
+              <Slider.Thumb
+                className="block w-3.5 h-3.5 bg-[#d28a4c] border-2 border-[#140d0a] rounded-full shadow hover:scale-110 focus:outline-none focus:ring-1 focus:ring-[#d28a4c] cursor-grab active:cursor-grabbing transition-transform"
+                aria-label="Preço máximo em ETH"
+              />
+            </Slider.Root>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -433,6 +520,12 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
       <section
         aria-label="Destaque principal"
         className="relative bg-[#140D0A] py-2 sm:py-4 lg:py-6 mb-8 md:mb-12"
+        onMouseEnter={() => setHeroPaused(true)}
+        onMouseLeave={() => setHeroPaused(false)}
+        onFocus={() => setHeroPaused(true)}
+        onBlur={() => setHeroPaused(false)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           <div className="lg:col-span-7 space-y-4">
@@ -472,30 +565,60 @@ export function HomePage({ search }: { search: HomeSearchParams }) {
                 fetchPriority="high"
                 width={420}
                 height={420}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
               />
             </Link>
           </div>
         </div>
 
-        {/* Hero Carousel Dots */}
-        <div className="flex items-center justify-center gap-2 mt-6">
-          {HERO_SLIDES.map((s, idx) => (
-            <button
-              key={s.id}
-              type="button"
-              aria-label={`Ir para destaque ${idx + 1}`}
-              onClick={() => setHeroIndex(idx)}
-              className={`w-2.5 h-2.5 rounded-full transition-colors cursor-pointer ${
-                idx === heroIndex ? 'bg-[#d28a4c]' : 'bg-[#55321f]'
-              }`}
-            />
-          ))}
+        {/* Hero Carousel Navigation */}
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <button
+            type="button"
+            data-testid="hero-prev-button"
+            aria-label="Slide anterior"
+            onClick={() =>
+              setHeroIndex((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)
+            }
+            className="p-1 rounded-full text-[#b39463] hover:text-[#d28a4c] hover:bg-[#241612] transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <div className="flex items-center gap-2">
+            {HERO_SLIDES.map((s, idx) => (
+              <button
+                key={s.id}
+                type="button"
+                data-testid={`hero-dot-${idx}`}
+                aria-label={`Ir para destaque ${idx + 1}`}
+                onClick={() => setHeroIndex(idx)}
+                className={`w-2.5 h-2.5 rounded-full transition-colors cursor-pointer ${
+                  idx === heroIndex ? 'bg-[#d28a4c]' : 'bg-[#55321f]'
+                }`}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            data-testid="hero-next-button"
+            aria-label="Próximo slide"
+            onClick={() =>
+              setHeroIndex((prev) => (prev + 1) % HERO_SLIDES.length)
+            }
+            className="p-1 rounded-full text-[#b39463] hover:text-[#d28a4c] hover:bg-[#241612] transition-colors cursor-pointer"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </section>
 
       {/* Main Catalog Area: Left Sidebar + Right Catalog */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div
+        id="mercado"
+        className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-20 md:scroll-mt-24"
+      >
         {/* Desktop Sidebar */}
         <aside
           aria-label="Filtros do catálogo"

@@ -498,4 +498,36 @@ test.describe('Kurio NFT Marketplace — E2E & Functional Suite', () => {
     await page.getByTestId('catalog-retry-button').click();
     await expect(page.getByTestId('catalog-grid')).toBeVisible();
   });
+
+  test('13. Interatividade dos sliders da home e navegação do botão Mercado para a listagem', async ({
+    page,
+    isMobile,
+  }) => {
+    // 1. Hero slider next/prev buttons
+    const heroPrev = page.getByTestId('hero-prev-button');
+    const heroNext = page.getByTestId('hero-next-button');
+    await expect(heroNext).toBeVisible();
+    await heroNext.click();
+    // After next, slide 2 (Sage Nomad #009) is shown
+    await expect(page.getByText('Coleção Kurio Nomads')).toBeVisible();
+    await heroPrev.click();
+    // Back to slide 1
+    await expect(page.getByText('Bem-vindo à Kurio')).toBeVisible();
+
+    // 2. Button "Mercado" navigates/scrolls to #mercado section
+    if (!isMobile) {
+      await page.getByTestId('header-mercado-link').click();
+      await expect(page).toHaveURL(/#mercado/);
+      const mercadoSection = page.locator('#mercado');
+      await expect(mercadoSection).toBeInViewport();
+    }
+
+    // 3. Price slider interaction
+    if (!isMobile) {
+      const priceSlider = page.getByTestId('filter-price-slider');
+      await expect(priceSlider).toBeVisible();
+      const thumbs = priceSlider.getByRole('slider');
+      await expect(thumbs).toHaveCount(2);
+    }
+  });
 });
